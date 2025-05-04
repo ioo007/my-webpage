@@ -41,18 +41,36 @@
 
   <p id="message"></p>
 
-  <script>
-    function register(event) {
-      event.preventDefault(); // 不要重新整理頁面
+  <script type="module">
+    const SUPABASE_URL = "https://你的專案.supabase.co"; // <-- 改這裡
+    const SUPABASE_KEY = "你的-anon-key";               // <-- 改這裡
 
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-      // 暫時只顯示註冊資訊
-      document.getElementById('message').innerText = `註冊成功！歡迎 ${name}（${email}）`;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      // 如果你想要儲存到 Supabase，可以在這裡加入對 Supabase 的呼叫
-    }
+    window.register = async function(event) {
+      event.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      if (!name || !email) {
+        document.getElementById('message').innerText = "請輸入完整資料。";
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("Members")
+        .insert([{ name, email }]);
+
+      if (error) {
+        document.getElementById('message').innerText = "註冊失敗：" + error.message;
+      } else {
+        document.getElementById('message').innerText = `註冊成功，歡迎 ${name}！`;
+        document.querySelector("form").reset();
+      }
+    };
   </script>
 </body>
 </html>
