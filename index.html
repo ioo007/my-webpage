@@ -2,11 +2,57 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>我的網頁</title>
+  <title>會員註冊</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+    }
+  </style>
 </head>
 <body>
-  <h1>歡迎來到我的網頁！</h1>
-  <p>qqqa這是一段測試文字，謝謝你的來訪。</p>
-  <img src="https://picsum.photos/400/300" alt="示意圖片">
+  <h1>歡迎加入會員！</h1>
+  <p>請填寫以下資訊完成註冊：</p>
+
+  <img src="https://picsum.photos/500/300" alt="示意圖片">
+
+  <form onsubmit="register(event)">
+    <input type="text" id="name" placeholder="請輸入名字" required>
+    <input type="email" id="email" placeholder="請輸入 Email" required>
+    <button type="submit">註冊</button>
+  </form>
+
+  <p id="message"></p>
+
+  <script>
+    function register(event) {
+      event.preventDefault(); // 不要重新整理頁面
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+
+      // 暫時只顯示註冊資訊
+      document.getElementById('message').innerText = `註冊成功！歡迎 ${name}（${email}）`;
+
+      // 如果你想要儲存到 Supabase，可以在這裡加入對 Supabase 的呼叫
+    }
+  </script>
 </body>
 </html>
