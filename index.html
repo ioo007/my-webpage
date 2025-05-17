@@ -21,20 +21,24 @@
       font-size: 16px;
     }
     button {
-      background-color: #28a745;
+      background-color: #0070f3;
       color: white;
       border: none;
+      cursor: pointer;
+    }
+    #message {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <h1>歡迎加入會員！</h1>
-  <p>請填寫以下資訊完成註冊：</p>
+  <p>請輸入以下資訊完成註冊：</p>
 
-  <img src="https://picsum.photos/500/300" alt="示意圖片">
+  <img src="https://picsum.photos/500/300" alt="示意圖">
 
   <form onsubmit="register(event)">
-    <input type="text" id="name" placeholder="請輸入名字" required>
+    <input type="text" id="name" placeholder="請輸入姓名" required>
     <input type="email" id="email" placeholder="請輸入 Email" required>
     <button type="submit">註冊</button>
   </form>
@@ -42,8 +46,9 @@
   <p id="message"></p>
 
   <script type="module">
-    const SUPABASE_URL = "https://你的專案.supabase.co"; // <-- 改這裡
-    const SUPABASE_KEY = "你的-anon-key";               // <-- 改這裡
+    // ✅ 使用你的 Supabase 設定
+    const SUPABASE_URL = "https://dlkqmoubskjkjwqfoxuj.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa3Ftb3Vic2tqa2p3cWZveHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1NjQ3NjEsImV4cCI6MjA2MTE0MDc2MX0.RZwqk-qdqdj5kXi_7fcRuAlepvdWbDKGWee49umBp4Y";
 
     import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
@@ -55,8 +60,11 @@
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
 
+      const message = document.getElementById('message');
+      message.textContent = '';
+
       if (!name || !email) {
-        document.getElementById('message').innerText = "請輸入完整資料。";
+        message.textContent = "請填寫所有欄位。";
         return;
       }
 
@@ -65,9 +73,9 @@
         .insert([{ name, email }]);
 
       if (error) {
-        document.getElementById('message').innerText = "註冊失敗：" + error.message;
+        message.textContent = "❌ 註冊失敗：" + error.message;
       } else {
-        document.getElementById('message').innerText = `註冊成功，歡迎 ${name}！`;
+        message.textContent = "✅ 註冊成功！歡迎 " + name + "！";
         document.querySelector("form").reset();
       }
     };
