@@ -41,9 +41,10 @@
       }
     }
   </style>
-  <!-- 引入 Supabase JS -->
+
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- 引入 QRCode.js -->
+  <!-- QRCode.js -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 </head>
 <body>
@@ -57,7 +58,6 @@
   <button id="loginBtn">登入</button>
 
   <p id="message"></p>
-
   <div id="qrCode"></div>
 
   <script>
@@ -66,27 +66,20 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa3Ftb3Vic2tqa2p3cWZveHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1NjQ3NjEsImV4cCI6MjA2MTE0MDc2MX0.RZwqk-qdqdj5kXi_7fcRuAlepvdWbDKGWee49umBp4Y';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const registerBtn = document.getElementById('registerBtn');
     const loginBtn = document.getElementById('loginBtn');
     const messageP = document.getElementById('message');
     const qrCodeDiv = document.getElementById('qrCode');
-    let qr;
 
     function clearQRCode() {
       qrCodeDiv.innerHTML = '';
-      qr = null;
     }
 
     function generateRandomString(length = 16) {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let result = '';
-      for(let i=0; i<length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return result;
+      return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
     }
 
     registerBtn.addEventListener('click', async () => {
@@ -104,9 +97,11 @@
 
       if (error) {
         messageP.textContent = '註冊失敗：' + error.message;
+        console.log('註冊錯誤:', error);
       } else {
         messageP.style.color = 'green';
         messageP.textContent = '註冊成功！請去信箱確認驗證信';
+        console.log('註冊資料:', data);
       }
     });
 
@@ -125,14 +120,27 @@
 
       if (error) {
         messageP.textContent = '登入失敗：' + error.message;
+        console.log('登入錯誤:', error);
       } else {
         messageP.style.color = 'green';
         messageP.textContent = '登入成功！生成你的專屬 QR Code';
+        console.log('登入資料:', data);
 
-        // 產生隨機字串做為 QR code 內容
+        // 儲存登入使用者 email 至 members 表
+        const user = data.user;
+        const insertResult = await supabase.from('members').insert([
+          { id: user.id, email: email }
+        ]);
+
+        if (insertResult.error) {
+          console.log('寫入 members 失敗:', insertResult.error.message);
+        } else {
+          console.log('已儲存至 members:', insertResult.data);
+        }
+
+        // 顯示 QR Code
         const randomString = generateRandomString(20);
-
-        qr = new QRCode(qrCodeDiv, {
+        new QRCode(qrCodeDiv, {
           text: randomString,
           width: 200,
           height: 200,
@@ -140,11 +148,5 @@
       }
     });
   </script>
-  console.log('註冊資料:', data);
-console.log('註冊錯誤:', error);
-console.log('登入資料:', data);
-console.log('登入錯誤:', error);
-
 </body>
 </html>
-messageP.textContent = '註冊成功！請去信箱確認驗證信';
