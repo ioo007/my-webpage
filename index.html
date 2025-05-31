@@ -64,7 +64,8 @@
     // 初始化 Supabase
     const supabaseUrl = 'https://dlkqmoubskjkjwqfoxuj.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa3Ftb3Vic2tqa2p3cWZveHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1NjQ3NjEsImV4cCI6MjA2MTE0MDc2MX0.RZwqk-qdqdj5kXi_7fcRuAlepvdWbDKGWee49umBp4Y';
-    const supabase = supabaseJs.createClient(supabaseUrl, supabaseKey);
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
 
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
@@ -139,5 +140,11 @@
       }
     });
   </script>
+  console.log('註冊資料:', data);
+console.log('註冊錯誤:', error);
+console.log('登入資料:', data);
+console.log('登入錯誤:', error);
+
 </body>
 </html>
+messageP.textContent = '註冊成功！請去信箱確認驗證信';
