@@ -54,14 +54,13 @@
   <input type="email" id="email" placeholder="請輸入 Email" />
   <input type="password" id="password" placeholder="請輸入密碼" />
 
-  <button id="registerBtn">註冊</button>
+  <button id="registerBtn">註冊並登入</button>
   <button id="loginBtn">登入</button>
 
   <p id="message"></p>
   <div id="qrCode"></div>
 
   <script>
-    // 初始化 Supabase
     const supabaseUrl = 'https://dlkqmoubskjkjwqfoxuj.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa3Ftb3Vic2tqa2p3cWZveHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1NjQ3NjEsImV4cCI6MjA2MTE0MDc2MX0.RZwqk-qdqdj5kXi_7fcRuAlepvdWbDKGWee49umBp4Y';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
@@ -82,6 +81,38 @@
       return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
     }
 
+    async function loginAndInsert(email, password) {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        messageP.style.color = 'red';
+        messageP.textContent = '登入失敗：' + error.message;
+        console.log('登入錯誤:', error);
+        return;
+      }
+
+      messageP.style.color = 'green';
+      messageP.textContent = '登入成功！生成你的專屬 QR Code';
+
+      const user = data.user;
+      const { error: insertError } = await supabase.from('members').insert([
+        { id: user.id, email: email }
+      ]);
+
+      if (insertError) {
+        console.log('寫入 members 失敗:', insertError.message);
+      } else {
+        console.log('已儲存至 members');
+      }
+
+      const randomString = generateRandomString(20);
+      new QRCode(qrCodeDiv, {
+        text: randomString,
+        width: 200,
+        height: 200,
+      });
+    }
+
     registerBtn.addEventListener('click', async () => {
       messageP.style.color = 'red';
       clearQRCode();
@@ -93,15 +124,14 @@
         return;
       }
 
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { error } = await supabase.auth.signUp({ email, password });
 
       if (error) {
         messageP.textContent = '註冊失敗：' + error.message;
         console.log('註冊錯誤:', error);
       } else {
-        messageP.style.color = 'green';
-        messageP.textContent = '註冊成功！請去信箱確認驗證信';
-        console.log('註冊資料:', data);
+        // 註冊成功，直接登入
+        loginAndInsert(email, password);
       }
     });
 
@@ -116,36 +146,7 @@
         return;
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        messageP.textContent = '登入失敗：' + error.message;
-        console.log('登入錯誤:', error);
-      } else {
-        messageP.style.color = 'green';
-        messageP.textContent = '登入成功！生成你的專屬 QR Code';
-        console.log('登入資料:', data);
-
-        // 儲存登入使用者 email 至 members 表
-        const user = data.user;
-        const insertResult = await supabase.from('members').insert([
-          { id: user.id, email: email }
-        ]);
-
-        if (insertResult.error) {
-          console.log('寫入 members 失敗:', insertResult.error.message);
-        } else {
-          console.log('已儲存至 members:', insertResult.data);
-        }
-
-        // 顯示 QR Code
-        const randomString = generateRandomString(20);
-        new QRCode(qrCodeDiv, {
-          text: randomString,
-          width: 200,
-          height: 200,
-        });
-      }
+      loginAndInsert(email, password);
     });
   </script>
 </body>
