@@ -1,32 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>註冊頁面</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+    img { max-width: 300px; margin-bottom: 20px; }
+    form { display: inline-block; text-align: left; }
+    label { display: block; margin: 10px 0; }
+    input { width: 100%; padding: 5px; }
+    button { padding: 10px 20px; font-size: 16px; }
+  </style>
 </head>
 <body>
-  <h1>歡迎註冊！</h1>
-  <img src="your-image-url.jpg" alt="圖片描述" width="300" />
+  <h1>歡迎報名活動！</h1>
+  <img src="https://via.placeholder.com/300x150?text=Welcome+Image" alt="歡迎圖片">
 
   <form id="registrationForm">
-    <label>姓名：<input type="text" name="name" required /></label><br>
-    <label>Email：<input type="email" name="email" required /></label><br>
-    <button type="submit">送出</button>
+    <label>姓名：<input type="text" name="name" required></label>
+    <label>Email：<input type="email" name="email" required></label>
+    <button type="submit">送出報名</button>
   </form>
 
   <script>
-    document.getElementById('registrationForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const data = Object.fromEntries(formData.entries());
+    const SUPABASE_URL = "https://tldibhzewnhqsbzwmque.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsZGliaHpld25ocXNiendtcXVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MDQ2MzcsImV4cCI6MjA2NDM4MDYzN30.hXe-JRlwIV_QBn4wmz96Q10jtOimqhuAiShsT5S30cA";
 
-      await fetch('https://你的後端網址/submit', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data),
+    document.getElementById("registrationForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const name = formData.get("name");
+      const email = formData.get("email");
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/maber`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          created_at: new Date().toISOString()
+        })
       });
 
-      alert('註冊完成！');
+      if (res.ok) {
+        alert("報名成功！");
+        e.target.reset();
+      } else {
+        const err = await res.text();
+        alert("錯誤：" + err);
+      }
     });
   </script>
 </body>
