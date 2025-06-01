@@ -1,102 +1,33 @@
-<script>
-  const supabaseUrl = 'https://dlkqmoubskjkjwqfoxuj.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa3Ftb3Vic2tqa2p3cWZveHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1NjQ3NjEsImV4cCI6MjA2MTE0MDc2MX0.RZwqk-qdqdj5kXi_7fcRuAlepvdWbDKGWee49umBp4Y';
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>註冊頁面</title>
+</head>
+<body>
+  <h1>歡迎註冊！</h1>
+  <img src="your-image-url.jpg" alt="圖片描述" width="300" />
 
-  // Supabase SDK 2.x，需從 supabase 物件解構 createClient
-  const { createClient } = supabase;
-  const supabaseClient = createClient(supabaseUrl, supabaseKey);
+  <form id="registrationForm">
+    <label>姓名：<input type="text" name="name" required /></label><br>
+    <label>Email：<input type="email" name="email" required /></label><br>
+    <button type="submit">送出</button>
+  </form>
 
-  const emailInput = document.getElementById('email');
-  const passwordInput = document.getElementById('password');
-  const registerBtn = document.getElementById('registerBtn');
-  const loginBtn = document.getElementById('loginBtn');
-  const messageP = document.getElementById('message');
-  const qrCodeDiv = document.getElementById('qrCode');
+  <script>
+    document.getElementById('registrationForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
 
-  function clearQRCode() {
-    qrCodeDiv.innerHTML = '';
-  }
+      await fetch('https://你的後端網址/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data),
+      });
 
-  function generateRandomString(length = 16) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
-  }
-
-  async function loginAndInsert(email, password) {
-    console.log('loginAndInsert 開始', email);
-
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      messageP.style.color = 'red';
-      messageP.textContent = '登入失敗：' + error.message;
-      console.error('登入錯誤:', error);
-      return;
-    }
-
-    messageP.style.color = 'green';
-    messageP.textContent = '登入成功！生成你的專屬 QR Code';
-
-    const user = data.user;
-    console.log('登入使用者:', user);
-
-    const { error: insertError } = await supabaseClient.from('members').insert([
-      { id: user.id, email: email }
-    ]);
-
-    if (insertError) {
-      console.error('寫入 members 失敗:', insertError.message);
-    } else {
-      console.log('已儲存至 members');
-    }
-
-    clearQRCode();
-    const randomString = generateRandomString(20);
-    new QRCode(qrCodeDiv, {
-      text: randomString,
-      width: 200,
-      height: 200,
+      alert('註冊完成！');
     });
-  }
-
-  registerBtn.addEventListener('click', async () => {
-    messageP.style.color = 'red';
-    clearQRCode();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    console.log('按下註冊:', email, password);
-
-    if (!email || !password) {
-      messageP.textContent = '請填寫 Email 和密碼';
-      return;
-    }
-
-    const { error } = await supabaseClient.auth.signUp({ email, password });
-    console.log('signUp 結果 error:', error);
-
-    if (error) {
-      messageP.textContent = '註冊失敗：' + error.message;
-      console.error('註冊錯誤:', error);
-    } else {
-      // 註冊成功，直接登入
-      await loginAndInsert(email, password);
-    }
-  });
-
-  loginBtn.addEventListener('click', async () => {
-    messageP.style.color = 'red';
-    clearQRCode();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    console.log('按下登入:', email, password);
-
-    if (!email || !password) {
-      messageP.textContent = '請填寫 Email 和密碼';
-      return;
-    }
-
-    await loginAndInsert(email, password);
-  });
-</script>
+  </script>
+</body>
+</html>
